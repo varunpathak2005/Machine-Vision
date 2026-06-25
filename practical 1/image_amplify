@@ -1,0 +1,161 @@
+# ============================================================
+# MACHINE VISION PRACTICAL
+# Nighttime CCTV Image Enhancement System
+#
+# Operations:
+# 1. Image Loading
+# 2. Brightness Enhancement
+# 3. Grayscale Conversion
+# 4. CLAHE Contrast Enhancement
+# 5. Noise Removal
+# 6. Image Sharpening
+# 7. Final Brightness Adjustment
+# 8. Original vs Enhanced Comparison
+# ============================================================
+
+import cv2
+import numpy as np
+
+# ============================================================
+# STEP 1: LOAD IMAGE
+# ============================================================
+
+img = cv2.imread("image.jpg")
+
+if img is None:
+    print("Error: CCTV image not found!")
+    exit()
+
+print("Image Loaded Successfully")
+
+# ============================================================
+# STEP 2: BRIGHTNESS ENHANCEMENT
+# ============================================================
+
+bright = cv2.convertScaleAbs(img, alpha=1.2, beta=20)
+
+# ============================================================
+# STEP 3: GRAYSCALE CONVERSION
+# ============================================================
+
+gray = cv2.cvtColor(bright, cv2.COLOR_BGR2GRAY)
+
+# ============================================================
+# STEP 4: CLAHE (ADAPTIVE HISTOGRAM EQUALIZATION)
+# ============================================================
+
+clahe = cv2.createCLAHE(
+    clipLimit=2.0,
+    tileGridSize=(8, 8)
+)
+
+clahe_img = clahe.apply(gray)
+
+# ============================================================
+# STEP 5: NOISE REMOVAL
+# ============================================================
+
+denoise = cv2.medianBlur(clahe_img, 3)
+
+# ============================================================
+# STEP 6: IMAGE SHARPENING
+# ============================================================
+
+kernel = np.array([
+    [0, -1, 0],
+    [-1, 5, -1],
+    [0, -1, 0]
+])
+
+sharpened = cv2.filter2D(denoise, -1, kernel)
+
+# ============================================================
+# STEP 7: FINAL BRIGHTNESS ADJUSTMENT
+# ============================================================
+
+final_result = cv2.convertScaleAbs(
+    sharpened,
+    alpha=1.1,
+    beta=15
+)
+
+# ============================================================
+# RESIZE IMAGES
+# ============================================================
+
+w = 350
+h = 250
+
+original_r = cv2.resize(img, (w, h))
+bright_r = cv2.resize(bright, (w, h))
+gray_r = cv2.resize(gray, (w, h))
+clahe_r = cv2.resize(clahe_img, (w, h))
+denoise_r = cv2.resize(denoise, (w, h))
+final_r = cv2.resize(final_result, (w, h))
+
+# Convert grayscale images to BGR for display
+gray_r = cv2.cvtColor(gray_r, cv2.COLOR_GRAY2BGR)
+clahe_r = cv2.cvtColor(clahe_r, cv2.COLOR_GRAY2BGR)
+denoise_r = cv2.cvtColor(denoise_r, cv2.COLOR_GRAY2BGR)
+final_r = cv2.cvtColor(final_r, cv2.COLOR_GRAY2BGR)
+
+# ============================================================
+# ADD LABELS
+# ============================================================
+
+font = cv2.FONT_HERSHEY_SIMPLEX
+
+cv2.putText(original_r, "1. Original", (10, 30),
+            font, 0.7, (255,255,255), 2)
+
+cv2.putText(bright_r, "2. Brightness", (10, 30),
+            font, 0.7, (255,255,255), 2)
+
+cv2.putText(gray_r, "3. Grayscale", (10, 30),
+            font, 0.7, (255,255,255), 2)
+
+cv2.putText(clahe_r, "4. CLAHE", (10, 30),
+            font, 0.7, (255,255,255), 2)
+
+cv2.putText(denoise_r, "5. Noise Removal", (10, 30),
+            font, 0.6, (255,255,255), 2)
+
+cv2.putText(final_r, "6. Final Result", (10, 30),
+            font, 0.7, (255,255,255), 2)
+
+# ============================================================
+# CREATE GRID
+# ============================================================
+
+top_row = cv2.hconcat([original_r, bright_r, gray_r])
+bottom_row = cv2.hconcat([clahe_r, denoise_r, final_r])
+
+all_steps = cv2.vconcat([top_row, bottom_row])
+
+# ============================================================
+# ORIGINAL VS FINAL COMPARISON
+# ============================================================
+
+orig_compare = cv2.resize(img, (500, 350))
+final_compare = cv2.resize(final_result, (500, 350))
+final_compare = cv2.cvtColor(final_compare, cv2.COLOR_GRAY2BGR)
+
+cv2.putText(orig_compare, "Original CCTV Image",
+            (10, 35), font, 0.8, (255,255,255), 2)
+
+cv2.putText(final_compare, "Enhanced CCTV Image",
+            (10, 35), font, 0.8, (255,255,255), 2)
+
+comparison = cv2.hconcat([orig_compare, final_compare])
+
+# ============================================================
+# DISPLAY OUTPUTS
+# ============================================================
+
+cv2.imshow("Image Enhancement Stages", all_steps)
+cv2.imshow("Original vs Enhanced", comparison)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+print("Image Enhancement Completed Successfully")
