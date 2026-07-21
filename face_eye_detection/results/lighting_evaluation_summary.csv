@@ -1,0 +1,10 @@
+condition,mean_brightness,faces_detected,total_eyes_detected
+original,227.4,1,2
+bright_overexposed,248.2,1,0
+dim_low_light,147.9,1,1
+very_dark,101.5,1,1
+low_contrast_hazy,175.3,1,1
+high_contrast_harsh,238.8,0,0
+gamma_dark_indoor,202.5,1,2
+gamma_bright_daylight,239.9,1,2
+noisy_low_light,167.3,1,1
